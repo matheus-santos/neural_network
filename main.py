@@ -14,18 +14,27 @@ class Edge(object):
 
     # Properties
     _value = 0
+    _weight = 0
 
     # Ctor
     def __init__(self, value=0):
         self._value = value
 
     # Setting value
-    def set(self, value):
+    def set(self, value=0):
         self._value = value
 
     # Getting value
     def get(self):
         return self._value
+
+    # Getting weight value (theta)
+    def getWeight(self):
+        return self._weight
+
+    # Setting weight value (theta)
+    def setWeight(self, weight=0):
+        self._weight = weight
 
 
 # Abstracting a network's cell
@@ -54,12 +63,28 @@ class Cells():
         for i in xrange(0, num_outputs):
             self.createOutput(0)
 
+    # Activation function
+    def _h(self):
+
+        # Get all inputs
+        h = sum([i.get() for i in self._inputs])
+
+        return h
+
     # Input
     def input(self, index):
-        return self._inputs[index]
+        try:
+            return self._inputs[index]
+        except Exception:
+            print("Error: Input {0} does not exists".format(index))
+            return None
 
     # Output
-    def output(self, index):
+    def output(self, index=0):
+
+        # Refeshing output
+        self._outputs[index].set(self._h())
+
         return self._outputs[index]
 
     # Creating input object
@@ -86,6 +111,10 @@ class Cells():
         """ Describing this cell """
         message = "Cell '{0}' has {1} inputs and {2} outputs."
         print(message.format(self._label, self._num_inputs, self._num_outputs))
+
+        for i in self._inputs:
+            print("input value={0} weight={1}".format(i.get(), i.getWeight()))
+
         return True
 
     # Clear
@@ -215,20 +244,29 @@ def main():
 
     # Building network
     n = NeuralNetwork()  # New network
+
+    # Layer
     n.createLayer(label="layer_0")  # Creating empty layer
-    n.layer(0).createCell(2, 1, "main_cell")  # Creating cell
-    n.layer(0).cell(0).describe()  # Describing cell 0
+
+    # Cell
+    n.layer(0).createCell(3, 1, "main_cell")  # Creating cell
 
     # Setting inputs
-    n.layer(0).cell(0).input(0).set(0)
-    n.layer(0).cell(0).input(1).set(0)
+    n.layer(0).cell(0).input(0).set(1)
+    n.layer(0).cell(0).input(1).set(1)
+    n.layer(0).cell(0).input(2).set(1)
 
-    # Getting inputs
-    input0 = n.layer(0).cell(0).input(0).get()
-    input1 = n.layer(0).cell(0).input(1).get()
+    # Setting weights
+    n.layer(0).cell(0).input(0).setWeight(-20)
+    n.layer(0).cell(0).input(1).setWeight(10)
+    n.layer(0).cell(0).input(2).setWeight(10)
 
-    print("Input0 = {0}, Input1 = {1}".format(input0, input1))
+    # Output
+    # output = n.layer(0).cell(0).output().get()
+
+    # Describing cell 0
+    n.layer(0).cell(0).describe()
 
 # Program
-# if __name__ == "main":
-main()
+if __name__ == "__main__":
+    main()
